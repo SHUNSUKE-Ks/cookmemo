@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import type { Recipe } from '../types/recipe';
+import React, { useState, useEffect, useRef } from 'react';
+import type { Recipe, Ingredient } from '../types/recipe';
 
 interface RecipeFormProps {
   onSave: (recipe: Omit<Recipe, 'id'>) => void;
@@ -9,7 +9,7 @@ interface RecipeFormProps {
 
 export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initialData }) => {
   const [title, setTitle] = useState('');
-  const [ingredients, setIngredients] = useState('');
+  const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: '', value: '', unit: '' }]);
   const [steps, setSteps] = useState('');
   const [tags, setTags] = useState('');
   const [tips, setTips] = useState('');
@@ -17,10 +17,12 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
   const [mood, setMood] = useState('');
   const [image, setImage] = useState<string | null>(null);
 
+  const valueInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title);
-      setIngredients(initialData.ingredients);
+      setIngredients(initialData.ingredients.length > 0 ? initialData.ingredients : [{ name: '', value: '', unit: '' }]);
       setSteps(initialData.steps.join('\n'));
       setTags(initialData.tags.join(', '));
       setTips(initialData.tips?.join('\n') || '');
@@ -36,7 +38,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
 
     onSave({
       title,
-      ingredients,
+      ingredients: ingredients.filter(ing => ing.name.trim() !== ''),
       steps: steps.split('\n').map((s) => s.trim()).filter(Boolean),
       tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
       tips: tips.split('\n').map((s) => s.trim()).filter(Boolean),
@@ -53,6 +55,22 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
     const reader = new FileReader();
     reader.onload = () => setImage(reader.result as string);
     reader.readAsDataURL(file);
+  };
+
+  const handleValueKeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const nextIndex = index + 1;
+      if (nextIndex < ingredients.length) {
+        valueInputRefs.current[nextIndex]?.focus();
+      } else {
+        // Last row, add new row
+        setIngredients([...ingredients, { name: '', value: '', unit: '' }]);
+        setTimeout(() => {
+          valueInputRefs.current[nextIndex]?.focus();
+        }, 0);
+      }
+    }
   };
 
   return (
@@ -74,12 +92,77 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
         
         <div style={{ marginBottom: '1rem' }}>
           <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>材料</label>
-          <textarea
-            rows={4}
-            placeholder="例: 牛肉 200g, じゃがいも 3個..."
-            value={ingredients}
-            onChange={(e) => setIngredients(e.target.value)}
-          />
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            <span style={{ flex: 3 }}>材料名</span>
+            <span style={{ flex: 1 }}>数値</span>
+            <span style={{ width: '60px' }}>単位</span>
+            <span style={{ width: '30px' }}></span>
+          </div>
+          {ingredients.map((ing, index) => (
+            <div key={index} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <input
+                type="text"
+                placeholder="名称"
+                value={ing.name}
+                onChange={(e) => {
+                  const newIngs = [...ingredients];
+                  newIngs[index].name = e.target.value;
+                  setIngredients(newIngs);
+                }}
+                style={{ flex: 3 }}
+              />
+              <input
+                ref={el => valueInputRefs.current[index] = el}
+                type="text"
+                placeholder="100"
+                value={ing.value}
+                onChange={(e) => {
+                  const newIngs = [...ingredients];
+                  // 全角を半角に変換
+                  let val = e.target.value.replace(/[！-～]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+                  // 数字（小数点含む）のみ許可
+                  val = val.replace(/[^0-9.]/g, '');
+                  newIngs[index].value = val;
+                  setIngredients(newIngs);
+                }}
+                onKeyDown={(e) => handleValueKeyDown(e, index)}
+                style={{ flex: 1 }}
+              />
+              <input
+                type="text"
+                placeholder="g"
+                value={ing.unit}
+                onChange={(e) => {
+                  const newIngs = [...ingredients];
+                  newIngs[index].unit = e.target.value;
+                  setIngredients(newIngs);
+                }}
+                style={{ width: '60px' }}
+              />
+              {ingredients.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setIngredients(ingredients.filter((_, i) => i !== index))}
+                  style={{ background: 'transparent', padding: '0.5rem', color: 'var(--error)', width: '30px' }}
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setIngredients([...ingredients, { name: '', value: '', unit: '' }])}
+            style={{ 
+              width: '100%', 
+              background: 'var(--bg-tertiary)', 
+              color: 'var(--accent-primary)',
+              marginTop: '0.5rem',
+              fontSize: '0.9rem'
+            }}
+          >
+            + 材料を追加
+          </button>
         </div>
 
         <div style={{ marginBottom: '1rem' }}>

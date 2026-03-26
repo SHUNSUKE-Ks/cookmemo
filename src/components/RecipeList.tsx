@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import type { Recipe } from '../types/recipe';
 
 interface RecipeListProps {
@@ -38,28 +38,17 @@ const RecipeCard: React.FC<{
   onSelect: (r: Recipe) => void; 
   onDelete: (id: number) => void 
 }> = ({ recipe, onSelect, onDelete }) => {
-  const lastTap = useRef<number>(0);
-
-  const handleTouch = () => {
-    const now = Date.now();
-    const DOUBLE_TAP_DELAY = 300;
-    
-    if (now - lastTap.current < DOUBLE_TAP_DELAY) {
-      // Double tap detected
-      onSelect(recipe);
-    }
-    lastTap.current = now;
-  };
 
   return (
     <div 
       className="premium-card" 
-      onClick={handleTouch}
+      onClick={() => onSelect(recipe)}
       style={{ 
         display: 'flex', 
         flexDirection: 'column',
         cursor: 'pointer',
         userSelect: 'none',
+        position: 'relative'
       }}
     >
       {recipe.image && (
@@ -82,14 +71,14 @@ const RecipeCard: React.FC<{
       <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
         <button 
           onClick={(e) => { e.stopPropagation(); onDelete(recipe.id); }}
-          style={{ padding: '0.5rem', color: 'var(--error)', background: 'transparent', fontSize: '1.25rem' }}
+          style={{ padding: '0.5rem', color: 'var(--error)', background: 'transparent', fontSize: '1.25rem', zIndex: 1 }}
           title="削除"
         >
           🗑️
         </button>
       </div>
       <div style={{ color: 'var(--text-muted)', fontSize: '0.6rem', opacity: 0.5, textAlign: 'center', marginTop: '0.5rem' }}>
-        ダブルタップで詳細を開く
+        タップで詳細を開く
       </div>
     </div>
   );

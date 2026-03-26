@@ -114,3 +114,30 @@ input:focus, textarea:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-primary);
 }
+
+/* Sticky Timer Section */
+.sticky-timer-section {
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary); /* Use solid background to prevent transparency issues with content below */
+  padding: 0.5rem 0 1rem 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+}
+
+.timer-instance {
+  transition: transform 0.1s ease;
+  background: var(--bg-secondary) !important; /* Stand out more in the sticky section */
+}
+
+.timer-instance:active {
+  transform: scale(0.98);
+}
+
+/* Form refinement */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

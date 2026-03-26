@@ -45,9 +45,20 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, onEd
       <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: '1fr' }}>
         <section>
           <h2 style={{ borderBottom: '2px solid var(--accent-primary)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>材料</h2>
-          <p style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
-            {recipe.ingredients || '未登録'}
-          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {recipe.ingredients.length > 0 ? (
+              recipe.ingredients.map((ing, index) => (
+                <div key={index} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid var(--border-color)', fontSize: '1.1rem' }}>
+                  <span style={{ color: 'var(--text-primary)' }}>{ing.name}</span>
+                  <span style={{ color: 'var(--accent-primary)', fontWeight: '600' }}>
+                    {ing.value} <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{ing.unit}</span>
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p style={{ color: 'var(--text-muted)' }}>未登録</p>
+            )}
+          </div>
         </section>
 
         <section>

@@ -5,6 +5,7 @@ import { RecipeForm } from './components/RecipeForm';
 import { RecipeList } from './components/RecipeList';
 import { RecipeDetail } from './components/RecipeDetail';
 import { TagFilter } from './components/TagFilter';
+import { Timer } from './components/Timer';
 
 function App() {
   const { recipes, addRecipe, updateRecipe, deleteRecipe, resetRecipes } = useRecipes();
@@ -37,18 +38,22 @@ function App() {
   };
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '480px', margin: '0 auto', minHeight: '100vh', backgroundColor: 'var(--bg-primary)', boxShadow: '0 0 30px rgba(0,0,0,0.5)' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '3rem' }}>
+    <div style={{ padding: '0 1rem 1rem 1rem', maxWidth: '480px', margin: '0 auto', minHeight: '100vh', backgroundColor: 'var(--bg-primary)', boxShadow: '0 0 30px rgba(0,0,0,0.5)' }}>
+      <header style={{ padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ color: 'var(--accent-primary)', fontSize: '2.5rem' }}>CookMemo</h1>
-          <p style={{ color: 'var(--text-muted)' }}>レシピをJSONでスマートに管理</p>
+          <h1 style={{ color: 'var(--accent-primary)', fontSize: '1.8rem' }}>CookMemo</h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>レシピをスマートに管理</p>
         </div>
         {view === 'list' && (
-          <button className="btn-primary" onClick={() => { setSelectedRecipe(null); setView('form'); }}>
+          <button className="btn-primary" onClick={() => { setSelectedRecipe(null); setView('form'); }} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
             + 新規作成
           </button>
         )}
       </header>
+      
+      <section className="sticky-timer-section">
+        <Timer />
+      </section>
 
       <main>
         {view === 'list' && (
