@@ -27,6 +27,11 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, onEd
             #{tag}
           </span>
         ))}
+        {recipe.mood && recipe.mood.map(m => (
+          <span key={m} style={{ background: 'rgba(250, 204, 21, 0.1)', border: '1px solid var(--accent-primary)', color: 'var(--accent-primary)', padding: '0.4rem 1rem', borderRadius: '100px', fontSize: '1rem' }}>
+            ✨ {m}
+          </span>
+        ))}
       </div>
 
       {recipe.image && (
