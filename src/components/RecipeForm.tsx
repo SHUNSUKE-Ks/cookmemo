@@ -18,7 +18,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
     if (initialData) {
       setTitle(initialData.title);
       setIngredients(initialData.ingredients);
-      setSteps(initialData.steps);
+      setSteps(initialData.steps.join('\n'));
       setTags(initialData.tags.join(', '));
       setImage(initialData.image);
     }
@@ -31,7 +31,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
     onSave({
       title,
       ingredients,
-      steps,
+      steps: steps.split('\n').map((s) => s.trim()).filter(Boolean),
       tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
       image,
     });

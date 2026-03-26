@@ -47,9 +47,33 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, onEd
 
         <section>
           <h2 style={{ borderBottom: '2px solid var(--accent-primary)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>手順</h2>
-          <p style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem', lineHeight: '1.8' }}>
-            {recipe.steps || '未登録'}
-          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {recipe.steps.length > 0 ? (
+              recipe.steps.map((step, index) => (
+                <div key={index} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                  <span style={{ 
+                    background: 'var(--accent-primary)', 
+                    color: 'var(--bg-primary)', 
+                    borderRadius: '50%', 
+                    width: '24px', 
+                    height: '24px', 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 'bold',
+                    flexShrink: 0,
+                    marginTop: '0.2rem'
+                  }}>
+                    {index + 1}
+                  </span>
+                  <p style={{ fontSize: '1.1rem', lineHeight: '1.6' }}>{step}</p>
+                </div>
+              ))
+            ) : (
+              <p style={{ color: 'var(--text-muted)' }}>未登録</p>
+            )}
+          </div>
         </section>
       </div>
     </div>
