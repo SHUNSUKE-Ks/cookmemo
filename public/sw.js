@@ -1,11 +1,11 @@
 const CACHE_NAME = 'cookmemo-v1';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon/icon-192x192.png',
-  '/icon/icon-512x512.png',
-  '/icon/apple-touch-icon.png'
+  './',
+  './index.html',
+  './manifest.json',
+  './icon/icon-192x192.png',
+  './icon/icon-512x512.png',
+  './icon/apple-touch-icon.png'
 ];
 
 self.addEventListener('install', (event) => {

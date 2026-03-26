@@ -2,19 +2,19 @@
   "name": "CookMemo - スマートレシピ管理",
   "short_name": "CookMemo",
   "description": "レシピをJSON形式で管理するプレミアムなレシピノートPWA",
-  "start_url": "/",
+  "start_url": "/cookmemo/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#facc15",
   "icons": [
     {
-      "src": "/icon/icon-192x192.png",
+      "src": "/cookmemo/icon/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon/icon-512x512.png",
+      "src": "/cookmemo/icon/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
