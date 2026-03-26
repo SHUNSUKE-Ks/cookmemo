@@ -1,0 +1,57 @@
+import React from 'react';
+import type { Recipe } from '../types/recipe';
+
+interface RecipeDetailProps {
+  recipe: Recipe;
+  onBack: () => void;
+  onEdit: () => void;
+}
+
+export const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, onEdit }) => {
+  return (
+    <div className="glass premium-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+        <button onClick={onBack} style={{ background: 'var(--bg-tertiary)', padding: '0.5rem 1rem' }}>
+          ← 戻る
+        </button>
+        <button onClick={onEdit} className="btn-primary" style={{ padding: '0.5rem 1.5rem' }}>
+          編集
+        </button>
+      </div>
+
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'var(--accent-primary)' }}>{recipe.title}</h1>
+      
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2rem' }}>
+        {recipe.tags.map((tag) => (
+          <span key={tag} style={{ background: 'var(--bg-tertiary)', padding: '0.4rem 1rem', borderRadius: '100px', color: 'var(--text-secondary)' }}>
+            #{tag}
+          </span>
+        ))}
+      </div>
+
+      {recipe.image && (
+        <img 
+          src={recipe.image} 
+          alt={recipe.title} 
+          style={{ width: '100%', maxHeight: '400px', objectFit: 'cover', borderRadius: '12px', marginBottom: '2rem' }} 
+        />
+      )}
+
+      <div style={{ display: 'grid', gap: '2rem', gridTemplateColumns: '1fr' }}>
+        <section>
+          <h2 style={{ borderBottom: '2px solid var(--accent-primary)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>材料</h2>
+          <p style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem', color: 'var(--text-secondary)' }}>
+            {recipe.ingredients || '未登録'}
+          </p>
+        </section>
+
+        <section>
+          <h2 style={{ borderBottom: '2px solid var(--accent-primary)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>手順</h2>
+          <p style={{ whiteSpace: 'pre-wrap', fontSize: '1.1rem', lineHeight: '1.8' }}>
+            {recipe.steps || '未登録'}
+          </p>
+        </section>
+      </div>
+    </div>
+  );
+};
