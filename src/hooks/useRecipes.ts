@@ -172,10 +172,18 @@ export const useRecipes = () => {
     setRecipes((prev) => prev.filter((r) => r.id !== id));
   };
 
+  const resetRecipes = () => {
+    if (window.confirm("全てのレシピを初期状態に戻しますか？（現在の追加・編集内容は失われます）")) {
+      setRecipes(INITIAL_RECIPES);
+      localStorage.setItem('cookmemo_recipes', JSON.stringify(INITIAL_RECIPES));
+    }
+  };
+
   return {
     recipes,
     addRecipe,
     updateRecipe,
     deleteRecipe,
+    resetRecipes,
   };
 };
