@@ -7,4 +7,5 @@ export interface Recipe {
   image: string | null;
   tips?: string[];
   story?: string;
+  mood?: string[];
 }

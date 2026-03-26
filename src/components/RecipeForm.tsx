@@ -14,6 +14,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
   const [tags, setTags] = useState('');
   const [tips, setTips] = useState('');
   const [story, setStory] = useState('');
+  const [mood, setMood] = useState('');
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,6 +25,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
       setTags(initialData.tags.join(', '));
       setTips(initialData.tips?.join('\n') || '');
       setStory(initialData.story || '');
+      setMood(initialData.mood?.join(', ') || '');
       setImage(initialData.image);
     }
   }, [initialData]);
@@ -39,6 +41,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
       tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
       tips: tips.split('\n').map((s) => s.trim()).filter(Boolean),
       story,
+      mood: mood.split(',').map((m) => m.trim()).filter(Boolean),
       image,
     });
   };
@@ -116,6 +119,16 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
             placeholder="例: 古くから地元で親しまれている..."
             value={story}
             onChange={(e) => setStory(e.target.value)}
+          />
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>気分・ムード (カンマ区切り)</label>
+          <input
+            type="text"
+            placeholder="例: パーティー, 癒やし, 週末"
+            value={mood}
+            onChange={(e) => setMood(e.target.value)}
           />
         </div>
 
