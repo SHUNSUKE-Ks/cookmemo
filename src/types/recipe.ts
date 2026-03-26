@@ -5,4 +5,6 @@ export interface Recipe {
   steps: string[];
   tags: string[];
   image: string | null;
+  tips?: string[];
+  story?: string;
 }

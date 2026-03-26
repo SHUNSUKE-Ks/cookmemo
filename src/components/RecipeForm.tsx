@@ -12,6 +12,8 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
   const [ingredients, setIngredients] = useState('');
   const [steps, setSteps] = useState('');
   const [tags, setTags] = useState('');
+  const [tips, setTips] = useState('');
+  const [story, setStory] = useState('');
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -20,6 +22,8 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
       setIngredients(initialData.ingredients);
       setSteps(initialData.steps.join('\n'));
       setTags(initialData.tags.join(', '));
+      setTips(initialData.tips?.join('\n') || '');
+      setStory(initialData.story || '');
       setImage(initialData.image);
     }
   }, [initialData]);
@@ -33,6 +37,8 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
       ingredients,
       steps: steps.split('\n').map((s) => s.trim()).filter(Boolean),
       tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
+      tips: tips.split('\n').map((s) => s.trim()).filter(Boolean),
+      story,
       image,
     });
   };
@@ -90,6 +96,26 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
             placeholder="例: 和食, 夕食, 時短"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
+          />
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>コツ・ポイント (改行区切り)</label>
+          <textarea
+            rows={3}
+            placeholder="例: 焼きすぎないよう注意..."
+            value={tips}
+            onChange={(e) => setTips(e.target.value)}
+          />
+        </div>
+
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>料理の由来・背景</label>
+          <textarea
+            rows={3}
+            placeholder="例: 古くから地元で親しまれている..."
+            value={story}
+            onChange={(e) => setStory(e.target.value)}
           />
         </div>
 

@@ -75,6 +75,26 @@ export const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, onEd
             )}
           </div>
         </section>
+
+        {recipe.tips && recipe.tips.length > 0 && (
+          <section style={{ background: 'rgba(250, 204, 21, 0.05)', padding: '1.5rem', borderRadius: '12px', borderLeft: '4px solid var(--accent-primary)' }}>
+            <h2 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--accent-primary)' }}>💡 コツ・ポイント</h2>
+            <ul style={{ listStyleType: 'none' }}>
+              {recipe.tips.map((tip, index) => (
+                <li key={index} style={{ marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>• {tip}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {recipe.story && (
+          <section>
+            <h2 style={{ borderBottom: '2px solid var(--accent-primary)', paddingBottom: '0.5rem', marginBottom: '1rem' }}>📖 この料理の背景</h2>
+            <p style={{ fontStyle: 'italic', color: 'var(--text-muted)', lineHeight: '1.8' }}>
+              {recipe.story}
+            </p>
+          </section>
+        )}
       </div>
     </div>
   );
