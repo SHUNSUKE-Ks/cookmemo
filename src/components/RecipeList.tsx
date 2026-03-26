@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import type { Recipe } from '../types/recipe';
 
 interface RecipeListProps {
@@ -40,7 +40,7 @@ const RecipeCard: React.FC<{
 }> = ({ recipe, onSelect, onDelete }) => {
   const lastTap = useRef<number>(0);
 
-  const handleTouch = (e: React.TouchEvent | React.MouseEvent) => {
+  const handleTouch = () => {
     const now = Date.now();
     const DOUBLE_TAP_DELAY = 300;
     

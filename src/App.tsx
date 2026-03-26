@@ -7,7 +7,7 @@ import { RecipeDetail } from './components/RecipeDetail';
 import { TagFilter } from './components/TagFilter';
 
 function App() {
-  const { recipes, addRecipe, updateRecipe, deleteRecipe } = useRecipes();
+  const { recipes, addRecipe, updateRecipe, deleteRecipe, resetRecipes } = useRecipes();
   const [view, setView] = useState<'list' | 'detail' | 'form'>('list');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   
@@ -97,7 +97,24 @@ function App() {
       </main>
 
       <footer style={{ marginTop: '5rem', padding: '2rem 0', borderTop: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-muted)' }}>
-        <p>&copy; 2026 CookMemo - Designed with Premium Dark Mode</p>
+        <p style={{ marginBottom: '1.5rem' }}>&copy; 2026 CookMemo - Premium Dark Mode</p>
+        <button 
+          onClick={resetRecipes}
+          style={{ 
+            background: 'rgba(250, 204, 21, 0.1)', 
+            color: 'var(--accent-primary)', 
+            fontSize: '0.85rem', 
+            border: '1px solid var(--accent-primary)', 
+            padding: '0.5rem 1rem', 
+            borderRadius: '8px',
+            cursor: 'pointer',
+            transition: 'var(--transition-smooth)'
+          }}
+          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(250, 204, 21, 0.2)'}
+          onMouseOut={(e) => e.currentTarget.style.background = 'rgba(250, 204, 21, 0.1)'}
+        >
+          🔄 全レシピを初期状態に戻す
+        </button>
       </footer>
     </div>
   );
