@@ -112,7 +112,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
                 style={{ flex: 3 }}
               />
               <input
-                ref={el => valueInputRefs.current[index] = el}
+                ref={el => { valueInputRefs.current[index] = el; }}
                 type="text"
                 placeholder="100"
                 value={ing.value}
