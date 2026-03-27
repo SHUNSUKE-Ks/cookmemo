@@ -237,6 +237,8 @@ function App() {
               recipes={recipes}
               onSelect={handleSelect}
               onDelete={deleteRecipe}
+              onToggleToday={toggleTodayRecipe}
+              todayIds={todayRecipes.map(r => r.id)}
               search={search}
               filterTag={filterTag}
             />
