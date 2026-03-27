@@ -5,15 +5,35 @@ interface RecipeDetailProps {
   recipe: Recipe;
   onBack: () => void;
   onEdit: () => void;
+  onToggleToday: (recipe: Recipe) => void;
+  isToday: boolean;
 }
 
-export const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, onEdit }) => {
+export const RecipeDetail: React.FC<RecipeDetailProps> = ({ recipe, onBack, onEdit, onToggleToday, isToday }) => {
   return (
     <div className="glass premium-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', gap: '1rem' }}>
         <button onClick={onBack} style={{ background: 'var(--bg-tertiary)', padding: '0.5rem 1rem' }}>
           ← 戻る
         </button>
+        <div style={{ display: 'flex', gap: '0.5rem', flex: 1 }}>
+          <button 
+            onClick={() => onToggleToday(recipe)}
+            style={{ 
+              flex: 1,
+              padding: '0.5rem', 
+              borderRadius: '8px',
+              background: isToday ? 'rgba(250, 204, 21, 0.2)' : 'var(--bg-tertiary)',
+              color: isToday ? 'var(--accent-primary)' : 'var(--text-primary)',
+              border: `1px solid ${isToday ? 'var(--accent-primary)' : 'var(--border-color)'}`,
+              fontSize: '0.9rem',
+              fontWeight: 'bold',
+              cursor: 'pointer'
+            }}
+          >
+            {isToday ? '⭐ 今日から解除' : '⭐ 今日に追加'}
+          </button>
+        </div>
         <button onClick={onEdit} className="btn-primary" style={{ padding: '0.5rem 1.5rem' }}>
           編集
         </button>

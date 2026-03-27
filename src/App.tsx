@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRecipes } from './hooks/useRecipes';
 import type { Recipe } from './types/recipe';
 import { RecipeForm } from './components/RecipeForm';
@@ -23,6 +23,71 @@ function App() {
   const [filterTag, setFilterTag] = useState('');
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
+  
+  // Shopping List States
+  const [todayRecipes, setTodayRecipes] = useState<Recipe[]>(() => {
+    const saved = localStorage.getItem('cookmemo_today');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [shoppingItems, setShoppingItems] = useState<any[]>(() => {
+    const saved = localStorage.getItem('cookmemo_shopping');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [isShoppingOpen, setIsShoppingOpen] = useState(false);
+
+  // Persistence
+  useEffect(() => {
+    localStorage.setItem('cookmemo_today', JSON.stringify(todayRecipes));
+  }, [todayRecipes]);
+
+  useEffect(() => {
+    localStorage.setItem('cookmemo_shopping', JSON.stringify(shoppingItems));
+  }, [shoppingItems]);
+
+  // Merge ingredients when todayRecipes changes
+  useEffect(() => {
+    const merged = todayRecipes.flatMap(r => r.ingredients);
+    const grouped = merged.reduce((acc, ing) => {
+      const key = ing.name;
+      const val = parseFloat(ing.value) || 0;
+      if (!acc[key]) {
+        // Try to find existing checked state
+        const existing = shoppingItems.find(item => item.name === ing.name);
+        acc[key] = {
+          name: ing.name,
+          value: val,
+          unit: ing.unit,
+          checked: existing ? existing.checked : false
+        };
+      } else {
+        acc[key].value += val;
+      }
+      return acc;
+    }, {} as Record<string, any>);
+
+    // Only update if the structure changed (basic check)
+    const newItems = Object.values(grouped);
+    if (JSON.stringify(newItems.map(i => ({n:i.name, v:i.value}))) !== 
+        JSON.stringify(shoppingItems.map(i => ({n:i.name, v:i.value})))) {
+      setShoppingItems(newItems);
+    }
+  }, [todayRecipes]);
+
+  const toggleTodayRecipe = (recipe: Recipe) => {
+    setTodayRecipes(prev => {
+      const exists = prev.find(r => r.id === recipe.id);
+      if (exists) {
+        return prev.filter(r => r.id !== recipe.id);
+      }
+      return [...prev, recipe];
+    });
+  };
+
+  const toggleCheck = (index: number) => {
+    const updated = [...shoppingItems];
+    updated[index].checked = !updated[index].checked;
+    setShoppingItems(updated);
+  };
 
   const allTags = Array.from(new Set(recipes.flatMap((r) => r.tags)));
 
@@ -119,11 +184,30 @@ function App() {
           <h1 style={{ color: 'var(--accent-primary)', fontSize: '1.8rem' }}>CookMemo</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>レシピをスマートに管理</p>
         </div>
-        {view === 'list' && (
-          <button className="btn-primary" onClick={() => { setSelectedRecipe(null); setView('form'); }} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
-            + 新規作成
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}>
+          <button 
+            onClick={() => setIsShoppingOpen(true)}
+            style={{ fontSize: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', position: 'relative' }}
+            title="買い物リスト"
+          >
+            📝
+            {shoppingItems.length > 0 && shoppingItems.some(i => !i.checked) && (
+              <span style={{ 
+                position: 'absolute', top: '2px', right: '0px', 
+                background: 'var(--accent-primary)', color: 'var(--bg-primary)', 
+                fontSize: '0.7rem', padding: '1px 5px', borderRadius: '10px',
+                fontWeight: 'bold', minWidth: '1.2rem', textAlign: 'center'
+              }}>
+                {shoppingItems.filter(i => !i.checked).length}
+              </span>
+            )}
           </button>
-        )}
+          {view === 'list' && (
+            <button className="btn-primary" onClick={() => { setSelectedRecipe(null); setView('form'); }} style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+              + 新規作成
+            </button>
+          )}
+        </div>
       </header>
       
       <section className="sticky-timer-section">
@@ -172,6 +256,8 @@ function App() {
             recipe={selectedRecipe}
             onBack={() => { setView('list'); setSelectedRecipe(null); }}
             onEdit={() => handleEdit(selectedRecipe)}
+            onToggleToday={toggleTodayRecipe}
+            isToday={todayRecipes.some(r => r.id === selectedRecipe.id)}
           />
         )}
       </main>
@@ -248,6 +334,78 @@ function App() {
                 キャンセル
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Shopping List Modal */}
+      {isShoppingOpen && (
+        <div style={{ 
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
+          backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', 
+          alignItems: 'end', zIndex: 1100
+        }}>
+          <div className="glass" style={{ 
+            width: '100%', maxWidth: '480px', maxHeight: '85vh', 
+            padding: '2rem 1.5rem', borderRadius: '24px 24px 0 0', 
+            display: 'flex', flexDirection: 'column', gap: '1.5rem',
+            overflowY: 'auto', borderBottom: 'none'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ color: 'var(--accent-primary)', fontSize: '1.5rem' }}>🛒 買い物リスト</h2>
+              <button onClick={() => setIsShoppingOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
+            </div>
+
+            {shoppingItems.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+                <p style={{ color: 'var(--text-primary)', fontSize: '1.1rem', marginBottom: '0.5rem' }}>リストが空です</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>レシピから「今日に追加」すると、材料が自動でここに表示されます。</p>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  <span>{todayRecipes.length} つのレシピから集計</span>
+                  <span>{shoppingItems.filter(i => i.checked).length} / {shoppingItems.length} 完了</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  {shoppingItems.map((item, i) => (
+                    <label key={i} style={{ 
+                      display: 'flex', alignItems: 'center', gap: '0.8rem', 
+                      padding: '0.8rem 1rem', background: 'rgba(255,255,255,0.05)', 
+                      borderRadius: '12px', cursor: 'pointer',
+                      border: '1px solid rgba(255,255,255,0.05)',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={item.checked}
+                        onChange={() => toggleCheck(i)}
+                        style={{ width: '22px', height: '22px', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+                      />
+                      <span style={{ 
+                        flex: 1,
+                        textDecoration: item.checked ? 'line-through' : 'none',
+                        color: item.checked ? 'var(--text-muted)' : 'var(--text-primary)',
+                        fontSize: '1rem'
+                      }}>
+                        {item.name}
+                      </span>
+                      <span style={{ 
+                        color: item.checked ? 'var(--text-muted)' : 'var(--accent-primary)', 
+                        fontWeight: 'bold',
+                        fontSize: '0.9rem'
+                      }}>
+                        {item.value} {item.unit}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <button onClick={() => setIsShoppingOpen(false)} className="btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
+              閉じる
+            </button>
           </div>
         </div>
       )}
