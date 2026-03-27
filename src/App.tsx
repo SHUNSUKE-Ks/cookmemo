@@ -9,12 +9,20 @@ import { Timer } from './components/Timer';
 import recipeSchema from './assets/recipeJson/recipe-schema.json';
 
 function App() {
-  const { recipes, addRecipe, updateRecipe, deleteRecipe } = useRecipes();
+  const { recipes, addRecipe, updateRecipe, deleteRecipe, importRecipes } = useRecipes();
   const [view, setView] = useState<'list' | 'detail' | 'form'>('list');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+
+  const handleCopySchema = () => {
+    navigator.clipboard.writeText(JSON.stringify(recipeSchema, null, 2))
+      .then(() => alert('インポート用スキーマをクリップボードにコピーしました。'))
+      .catch(() => alert('コピーに失敗しました。'));
+  };
   
   const [search, setSearch] = useState('');
   const [filterTag, setFilterTag] = useState('');
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [jsonInput, setJsonInput] = useState('');
 
   const allTags = Array.from(new Set(recipes.flatMap((r) => r.tags)));
 
@@ -88,16 +96,24 @@ function App() {
     e.target.value = '';
   };
 
-  const { importRecipes } = useRecipes();
-
-  const handleCopySchema = () => {
-    navigator.clipboard.writeText(JSON.stringify(recipeSchema, null, 2))
-      .then(() => alert('インポート用スキーマをクリップボードにコピーしました。'))
-      .catch(() => alert('コピーに失敗しました。'));
+  const handleTextImport = () => {
+    try {
+      const json = JSON.parse(jsonInput);
+      if (validateRecipes(json)) {
+        importRecipes(json);
+        alert(`${json.length}件のレシピをインポートしました。`);
+        setIsImportModalOpen(false);
+        setJsonInput('');
+      } else {
+        alert('JSONの形式が正しくありません。スキーマを確認してください。');
+      }
+    } catch (err) {
+      alert('JSONのパースに失敗しました。正しいJSON形式で入力してください。');
+    }
   };
 
   return (
-    <div style={{ padding: '0 1rem 1rem 1rem', maxWidth: '480px', margin: '0 auto', minHeight: '100vh', backgroundColor: 'var(--bg-primary)', boxShadow: '0 0 30px rgba(0,0,0,0.5)' }}>
+    <div style={{ padding: '0 1rem 1rem 1rem', maxWidth: '480px', margin: '0 auto', minHeight: '100vh', backgroundColor: 'var(--bg-primary)', boxShadow: '0 0 30px rgba(0,0,0,0.5)', position: 'relative' }}>
       <header style={{ padding: '1rem 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ color: 'var(--accent-primary)', fontSize: '1.8rem' }}>CookMemo</h1>
@@ -165,16 +181,16 @@ function App() {
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <label style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer' }}>
+              📤 Import
+              <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
+            </label>
             <button 
               onClick={handleExport}
               style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}
             >
               📥 Export JSON
             </button>
-            <label style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', background: 'var(--bg-tertiary)', color: 'var(--text-primary)', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer' }}>
-              📤 Import
-              <input type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
-            </label>
             <button 
               onClick={handleCopySchema}
               style={{ 
@@ -189,8 +205,52 @@ function App() {
               📋 Copy Schema
             </button>
           </div>
+          
+          <button 
+            onClick={() => setIsImportModalOpen(true)}
+            style={{ 
+              padding: '0.5rem 1rem', 
+              fontSize: '0.85rem', 
+              background: 'var(--bg-tertiary)', 
+              color: 'var(--accent-primary)', 
+              borderRadius: '8px', 
+              border: '1px dashed var(--accent-primary)',
+              marginTop: '0.5rem'
+            }}
+          >
+            📝 JSON Text Import
+          </button>
         </div>
       </footer>
+
+      {/* JSON Import Modal */}
+      {isImportModalOpen && (
+        <div style={{ 
+          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
+          backgroundColor: 'rgba(0,0,0,0.8)', display: 'flex', justifyContent: 'center', 
+          alignItems: 'center', zIndex: 1000, padding: '1rem' 
+        }}>
+          <div className="glass" style={{ width: '100%', maxWidth: '400px', padding: '1.5rem', borderRadius: '16px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <h3 style={{ color: 'var(--accent-primary)' }}>JSONを貼り付けてインポート</h3>
+            <textarea
+              rows={10}
+              placeholder='[ { "title": "...", "ingredients": [...] } ]'
+              value={jsonInput}
+              onChange={(e) => setJsonInput(e.target.value)}
+              style={{ width: '100%', background: 'rgba(15, 23, 42, 0.6)', color: 'var(--text-primary)', fontSize: '0.8rem', fontFamily: 'monospace' }}
+            />
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button onClick={handleTextImport} className="btn-primary" style={{ flex: 1 }}>インポート実行</button>
+              <button 
+                onClick={() => { setIsImportModalOpen(false); setJsonInput(''); }}
+                style={{ flex: 1, background: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
