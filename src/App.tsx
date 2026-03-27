@@ -108,6 +108,16 @@ function App() {
     setShoppingItems(updated);
   };
 
+  const addFromShoppingToInventory = (name: string) => {
+    if (inventoryItems.some(inv => inv.name === name)) return;
+    const newItem = {
+      name: name,
+      checked: false,
+      id: Date.now()
+    };
+    setInventoryItems([...inventoryItems, newItem]);
+  };
+
   const addInventoryItem = () => {
     if (!inventoryInput.trim()) return;
     const newItem = {
@@ -362,7 +372,7 @@ function App() {
                       cursor: 'pointer', transition: 'all 0.2s', fontWeight: 'bold'
                     }}
                   >
-                    {excludeInventory ? '✅ 在庫ありを除外中' : '🔍 在庫ありを除外'}
+                    {excludeInventory ? '✅ 在庫確認済み' : '🔍 在庫確認済み'}
                   </button>
                   <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                     {todayRecipes.length} つの献立
@@ -382,36 +392,59 @@ function App() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                       {shoppingItems
                         .filter(item => !excludeInventory || !inventoryItems.some(inv => inv.name === item.name))
-                        .map((item, i) => (
-                        <label key={i} style={{ 
-                          display: 'flex', alignItems: 'center', gap: '1rem', 
-                          padding: '1rem', background: 'rgba(255,255,255,0.05)', 
-                          borderRadius: '16px', cursor: 'pointer',
-                          border: '1px solid rgba(255,255,255,0.1)'
-                        }}>
-                          <input
-                            type="checkbox"
-                            checked={item.checked}
-                            onChange={() => toggleCheck(i)}
-                            style={{ width: '24px', height: '24px', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
-                          />
-                          <span style={{ 
-                            flex: 1,
-                            textDecoration: item.checked ? 'line-through' : 'none',
-                            color: item.checked ? 'var(--text-muted)' : 'var(--text-primary)',
-                            fontSize: '1.1rem'
-                          }}>
-                            {item.name}
-                          </span>
-                          <span style={{ 
-                            color: item.checked ? 'var(--text-muted)' : 'var(--accent-primary)', 
-                            fontWeight: 'bold',
-                            fontSize: '1.1rem'
-                          }}>
-                            {item.value} {item.unit}
-                          </span>
-                        </label>
-                      ))}
+                        .map((item, i) => {
+                          const isInInventory = inventoryItems.some(inv => inv.name === item.name);
+                          return (
+                            <div key={i} style={{ 
+                              display: 'flex', alignItems: 'center', gap: '1rem', 
+                              padding: '1rem', background: 'rgba(255,255,255,0.05)', 
+                              borderRadius: '16px',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              position: 'relative'
+                            }}>
+                              <input
+                                type="checkbox"
+                                checked={item.checked}
+                                onChange={() => toggleCheck(i)}
+                                style={{ width: '24px', height: '24px', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+                              />
+                              <span style={{ 
+                                flex: 1,
+                                textDecoration: item.checked ? 'line-through' : 'none',
+                                color: item.checked ? 'var(--text-muted)' : 'var(--text-primary)',
+                                fontSize: '1.1rem'
+                              }}>
+                                {item.name}
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                <span style={{ 
+                                  color: item.checked ? 'var(--text-muted)' : 'var(--accent-primary)', 
+                                  fontWeight: 'bold',
+                                  fontSize: '1.1rem'
+                                }}>
+                                  {item.value} {item.unit}
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    addFromShoppingToInventory(item.name);
+                                  }}
+                                  style={{ 
+                                    background: isInInventory ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255,255,255,0.05)', 
+                                    border: `1px solid ${isInInventory ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255,255,255,0.1)'}`,
+                                    padding: '0.4rem 0.6rem', borderRadius: '8px', cursor: isInInventory ? 'default' : 'pointer',
+                                    fontSize: '0.8rem', color: isInInventory ? '#22c55e' : 'var(--text-primary)',
+                                    display: 'flex', alignItems: 'center', gap: '0.3rem'
+                                  }}
+                                  title={isInInventory ? "在庫登録済み" : "在庫に登録"}
+                                >
+                                  {isInInventory ? '✅' : '📦+'}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
                     </div>
                   </>
                 )}
