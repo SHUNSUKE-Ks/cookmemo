@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CookMemo Recipe Schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["title", "ingredients", "steps", "tags"],
+    "properties": {
+      "id": {
+        "type": "number",
+        "description": "Unique identifier for the recipe"
+      },
+      "title": {
+        "type": "string",
+        "description": "Name of the recipe"
+      },
+      "ingredients": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["name", "value", "unit"],
+          "properties": {
+            "name": { "type": "string" },
+            "value": { "type": "string", "description": "Numeric value as string" },
+            "unit": { "type": "string", "description": "Unit (e.g., g, ml, tbsp)" }
+          }
+        }
+      },
+      "steps": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "tags": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "image": {
+        "type": ["string", "null"]
+      },
+      "tips": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "story": {
+        "type": "string"
+      },
+      "mood": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  }
+}

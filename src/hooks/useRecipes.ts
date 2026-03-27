@@ -85,11 +85,21 @@ export const useRecipes = () => {
     }
   };
 
+  const importRecipes = (imported: Recipe[]) => {
+    // Re-index to avoid ID conflicts with existing ones
+    const reindexed = imported.map((r, index) => ({
+      ...r,
+      id: Date.now() + index
+    }));
+    setRecipes((prev) => [...reindexed, ...prev]);
+  };
+
   return {
     recipes,
     addRecipe,
     updateRecipe,
     deleteRecipe,
     resetRecipes,
+    importRecipes,
   };
 };
