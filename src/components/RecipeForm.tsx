@@ -183,6 +183,30 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSave, onCancel, initia
             value={tags}
             onChange={(e) => setTags(e.target.value)}
           />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.5rem' }}>
+            {['前菜', 'スープ', 'メイン', 'デザート'].map(tag => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => {
+                  const currentTags = tags.split(',').map(t => t.trim()).filter(Boolean);
+                  if (!currentTags.includes(tag)) {
+                    setTags(currentTags.concat(tag).join(', '));
+                  }
+                }}
+                style={{ 
+                  padding: '0.2rem 0.6rem', 
+                  fontSize: '0.75rem', 
+                  background: 'var(--bg-tertiary)', 
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '100px',
+                  color: 'var(--text-secondary)'
+                }}
+              >
+                + {tag}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div style={{ marginBottom: '1rem' }}>
