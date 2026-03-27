@@ -14,6 +14,11 @@ function App() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [showTimer, setShowTimer] = useState(() => localStorage.getItem('cookmemo_show_timer') === 'true');
   const [shoppingTab, setShoppingTab] = useState<'shopping' | 'inventory'>('shopping');
+  const [excludeInventory, setExcludeInventory] = useState(() => localStorage.getItem('cookmemo_exclude_inv') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('cookmemo_exclude_inv', excludeInventory.toString());
+  }, [excludeInventory]);
 
   const handleCopySchema = () => {
     navigator.clipboard.writeText(JSON.stringify(recipeSchema, null, 2))
@@ -347,19 +352,37 @@ function App() {
 
             {shoppingTab === 'shopping' ? (
               <>
-                {shoppingItems.length === 0 ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <button 
+                    onClick={() => setExcludeInventory(!excludeInventory)}
+                    style={{ 
+                      padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '8px', border: '1px solid var(--accent-primary)',
+                      background: excludeInventory ? 'var(--accent-primary)' : 'transparent',
+                      color: excludeInventory ? 'white' : 'var(--accent-primary)',
+                      cursor: 'pointer', transition: 'all 0.2s', fontWeight: 'bold'
+                    }}
+                  >
+                    {excludeInventory ? '✅ 在庫ありを除外中' : '🔍 在庫ありを除外'}
+                  </button>
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    {todayRecipes.length} つの献立
+                  </div>
+                </div>
+
+                {shoppingItems.filter(item => !excludeInventory || !inventoryItems.some(inv => inv.name === item.name)).length === 0 ? (
                   <div style={{ textAlign: 'center', padding: '5rem 1rem' }}>
                     <p style={{ color: 'var(--text-primary)', fontSize: '1.2rem', marginBottom: '1rem' }}>リストが空です</p>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>レシピから「今日に追加」すると、材料が自動で集計されます。</p>
                   </div>
                 ) : (
                   <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
-                      <span>{todayRecipes.length} つの献立</span>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                       <span>{shoppingItems.filter(i => i.checked).length} / {shoppingItems.length} 完了</span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      {shoppingItems.map((item, i) => (
+                      {shoppingItems
+                        .filter(item => !excludeInventory || !inventoryItems.some(inv => inv.name === item.name))
+                        .map((item, i) => (
                         <label key={i} style={{ 
                           display: 'flex', alignItems: 'center', gap: '1rem', 
                           padding: '1rem', background: 'rgba(255,255,255,0.05)', 
@@ -425,14 +448,26 @@ function App() {
                           onChange={() => toggleInventoryCheck(item.id)}
                           style={{ width: '22px', height: '22px', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
                         />
-                        <span style={{ 
-                          flex: 1,
-                          textDecoration: item.checked ? 'line-through' : 'none',
-                          color: item.checked ? 'var(--text-muted)' : 'var(--text-primary)',
-                          fontSize: '1.1rem'
-                        }}>
-                          {item.name}
-                        </span>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ 
+                            textDecoration: item.checked ? 'line-through' : 'none',
+                            color: item.checked ? 'var(--text-muted)' : 'var(--text-primary)',
+                            fontSize: '1.1rem'
+                          }}>
+                            {item.name}
+                          </span>
+                          <span style={{ 
+                            padding: '0.2rem 0.5rem', 
+                            fontSize: '0.7rem', 
+                            borderRadius: '6px',
+                            background: item.checked ? 'rgba(250, 204, 21, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+                            color: item.checked ? 'var(--accent-primary)' : '#22c55e',
+                            border: `1px solid ${item.checked ? 'rgba(250, 204, 21, 0.2)' : 'rgba(34, 197, 94, 0.2)'}`,
+                            fontWeight: 'bold'
+                          }}>
+                            {item.checked ? '発注済み' : '納品済み'}
+                          </span>
+                        </div>
                         <button 
                           onClick={() => deleteInventoryItem(item.id)}
                           style={{ background: 'none', border: 'none', color: 'var(--error)', padding: '0.5rem', cursor: 'pointer' }}
@@ -450,7 +485,6 @@ function App() {
       </main>
 
       <footer style={{ marginTop: '5rem', padding: '2rem 1.5rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-muted)' }}>
-        <p style={{ marginBottom: '1.5rem' }}>&copy; 2026 CookMemo - Premium Dark Mode</p>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', justifyContent: 'center' }}>
