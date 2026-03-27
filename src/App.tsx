@@ -10,7 +10,7 @@ import recipeSchema from './assets/recipeJson/recipe-schema.json';
 
 function App() {
   const { recipes, addRecipe, updateRecipe, deleteRecipe, importRecipes } = useRecipes();
-  const [view, setView] = useState<'list' | 'detail' | 'form'>('list');
+  const [view, setView] = useState<'list' | 'detail' | 'form' | 'shopping'>('list');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   const handleCopySchema = () => {
@@ -33,7 +33,6 @@ function App() {
     const saved = localStorage.getItem('cookmemo_shopping');
     return saved ? JSON.parse(saved) : [];
   });
-  const [isShoppingOpen, setIsShoppingOpen] = useState(false);
 
   // Persistence
   useEffect(() => {
@@ -186,7 +185,7 @@ function App() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', position: 'relative' }}>
           <button 
-            onClick={() => setIsShoppingOpen(true)}
+            onClick={() => setView('shopping')}
             style={{ fontSize: '1.5rem', background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', position: 'relative' }}
             title="買い物リスト"
           >
@@ -262,6 +261,66 @@ function App() {
             isToday={todayRecipes.some(r => r.id === selectedRecipe.id)}
           />
         )}
+
+        {view === 'shopping' && (
+          <div className="glass premium-card" style={{ padding: '1.5rem', minHeight: '60vh' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+              <button 
+                onClick={() => setView('list')} 
+                style={{ background: 'var(--bg-tertiary)', padding: '0.5rem 1rem' }}
+              >
+                ← 戻る
+              </button>
+              <h2 style={{ color: 'var(--accent-primary)', fontSize: '1.5rem', margin: 0 }}>🛒 買い物リスト</h2>
+            </div>
+
+            {shoppingItems.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '5rem 1rem' }}>
+                <p style={{ color: 'var(--text-primary)', fontSize: '1.2rem', marginBottom: '1rem' }}>リストが空です</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>レシピから「今日に追加」すると、材料が自動で集計されます。</p>
+              </div>
+            ) : (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                  <span>{todayRecipes.length} つの献立</span>
+                  <span>{shoppingItems.filter(i => i.checked).length} / {shoppingItems.length} 完了</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {shoppingItems.map((item, i) => (
+                    <label key={i} style={{ 
+                      display: 'flex', alignItems: 'center', gap: '1rem', 
+                      padding: '1rem', background: 'rgba(255,255,255,0.05)', 
+                      borderRadius: '16px', cursor: 'pointer',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={item.checked}
+                        onChange={() => toggleCheck(i)}
+                        style={{ width: '24px', height: '24px', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
+                      />
+                      <span style={{ 
+                        flex: 1,
+                        textDecoration: item.checked ? 'line-through' : 'none',
+                        color: item.checked ? 'var(--text-muted)' : 'var(--text-primary)',
+                        fontSize: '1.1rem'
+                      }}>
+                        {item.name}
+                      </span>
+                      <span style={{ 
+                        color: item.checked ? 'var(--text-muted)' : 'var(--accent-primary)', 
+                        fontWeight: 'bold',
+                        fontSize: '1.1rem'
+                      }}>
+                        {item.value} {item.unit}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </main>
 
       <footer style={{ marginTop: '5rem', padding: '2rem 1.5rem', borderTop: '1px solid var(--border-color)', textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -336,78 +395,6 @@ function App() {
                 キャンセル
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Shopping List Modal */}
-      {isShoppingOpen && (
-        <div style={{ 
-          position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', 
-          backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', 
-          alignItems: 'end', zIndex: 1100
-        }}>
-          <div className="glass" style={{ 
-            width: '100%', maxWidth: '480px', maxHeight: '85vh', 
-            padding: '2rem 1.5rem', borderRadius: '24px 24px 0 0', 
-            display: 'flex', flexDirection: 'column', gap: '1.5rem',
-            overflowY: 'auto', borderBottom: 'none'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ color: 'var(--accent-primary)', fontSize: '1.5rem' }}>🛒 買い物リスト</h2>
-              <button onClick={() => setIsShoppingOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '1.5rem', cursor: 'pointer' }}>✕</button>
-            </div>
-
-            {shoppingItems.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-                <p style={{ color: 'var(--text-primary)', fontSize: '1.1rem', marginBottom: '0.5rem' }}>リストが空です</p>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>レシピから「今日に追加」すると、材料が自動でここに表示されます。</p>
-              </div>
-            ) : (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  <span>{todayRecipes.length} つのレシピから集計</span>
-                  <span>{shoppingItems.filter(i => i.checked).length} / {shoppingItems.length} 完了</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  {shoppingItems.map((item, i) => (
-                    <label key={i} style={{ 
-                      display: 'flex', alignItems: 'center', gap: '0.8rem', 
-                      padding: '0.8rem 1rem', background: 'rgba(255,255,255,0.05)', 
-                      borderRadius: '12px', cursor: 'pointer',
-                      border: '1px solid rgba(255,255,255,0.05)',
-                      transition: 'all 0.2s ease'
-                    }}>
-                      <input
-                        type="checkbox"
-                        checked={item.checked}
-                        onChange={() => toggleCheck(i)}
-                        style={{ width: '22px', height: '22px', accentColor: 'var(--accent-primary)', cursor: 'pointer' }}
-                      />
-                      <span style={{ 
-                        flex: 1,
-                        textDecoration: item.checked ? 'line-through' : 'none',
-                        color: item.checked ? 'var(--text-muted)' : 'var(--text-primary)',
-                        fontSize: '1rem'
-                      }}>
-                        {item.name}
-                      </span>
-                      <span style={{ 
-                        color: item.checked ? 'var(--text-muted)' : 'var(--accent-primary)', 
-                        fontWeight: 'bold',
-                        fontSize: '0.9rem'
-                      }}>
-                        {item.value} {item.unit}
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </>
-            )}
-
-            <button onClick={() => setIsShoppingOpen(false)} className="btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
-              閉じる
-            </button>
           </div>
         </div>
       )}
